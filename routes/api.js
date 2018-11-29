@@ -110,7 +110,6 @@ module.exports = function (app) {
                 if (err) {
                   console.log(err);
                 } else{
-                  console.log(doc.matchedCount);
                   res.json('successfully updated '+id);
                 }
               });
@@ -122,7 +121,30 @@ module.exports = function (app) {
 
     .delete(function (req, res){
       var project = req.params.project;
-      res.json('del');
+      var id=req.body._id;
+      MongoClient.connect(CONNECTION_STRING, function(err, db) {
+          if(err) {
+            console.log(err);
+          } else {
+            console.log('Connected to database');
+            if(!MongoClient.ObjectID.isValid(id)){
+              res.json('could not delete '+id);
+              return;
+            }
+            db.collection(project).deleteOne({_id: ObjectId(id)}, function(err, doc){
+              if(err) {
+                console.log(err);
+                res.json('could not delete '+id);
+              } else{
+                if(doc.deletedCount===0){
+                  res.json('could not delete '+id);
+                } else {
+                  res.json('deleted '+id);
+                }
+              }
+            });
+          }
+      });
     });
     
   
