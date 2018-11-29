@@ -16,18 +16,37 @@ const CONNECTION_STRING = process.env.DB;
 
 module.exports = function (app) {
 
-  
-    
-  app.route('/valami')
-      .get(function (req, res){
-        res.send('valami');  
-      });
       
   app.route('/api/issues/:project')
 
     .get(function (req, res){
       var project = req.params.project;
-      res.json('get');
+      MongoClient.connect(CONNECTION_STRING, function(err, db) {
+        if(err) {
+          console.log(err);
+        } else {
+          console.log('Connected to database');
+          let objFind={};
+          if (req.query.issue_title) objFind.issue_title = req.query.issue_title;
+          if (req.query.issue_text) objFind.issue_text = req.query.issue_text;
+          if (req.query.created_by) objFind.created_by = req.query.created_by;
+          if (req.query.assigned_to) objFind.assigned_to = req.query.assigned_to;
+          if (req.query.status_text) objFind.status_text = req.query.status_text;
+          if (req.query.issue_title) objFind.issue_title = req.query.issue_title;
+          if (req.query.created_on) objFind.created_on = req.query.created_on;
+          if (req.query.updated_on) objFind.updated_on = req.query.updated_on;
+          if (req.query.open==='true') objFind.open = true;
+          if (req.query.open==='false') objFind.open = false;
+          
+          db.collection(project).find(objFind).toArray(function(err, docs) {
+            if(err) {
+              console.log(err);
+            } else {
+              res.json(docs);
+            }
+          })
+        }
+      });
     })
 
     .post(function (req, res){
@@ -99,11 +118,12 @@ module.exports = function (app) {
               if (req.body.assigned_to) objForUpdate.assigned_to = req.body.assigned_to;
               if (req.body.status_text) objForUpdate.status_text = req.body.status_text;
               if (req.body.issue_title) objForUpdate.issue_title = req.body.issue_title;
-              if (req.body.open) objForUpdate.open = req.body.open;
+              if (req.body.open===false || req.body.open==='false') objForUpdate.open = false;
               if (Object.keys(objForUpdate).length===0) {
                 res.json('no updated field sent');
                 return;
               }
+              if (req.body.open===true || req.body.open==='true') objForUpdate.open = true;
               objForUpdate.updated_on = new Date;
               
               db.collection(project).updateOne({_id: ObjectId(id)},{ $set: objForUpdate }, function(err, doc){
