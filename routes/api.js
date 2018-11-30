@@ -53,6 +53,11 @@ module.exports = function (app) {
       var project = req.params.project;
       var currTime = new Date;
     
+      if(!req.body.issue_title || !req.body.issue_text || !req.body.created_by) {
+        res.json('missing required field');
+        return;
+      }
+    
       MongoClient.connect(CONNECTION_STRING, function(err, db) {
         if(err) {
           console.log(err);
