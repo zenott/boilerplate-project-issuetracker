@@ -182,7 +182,9 @@ suite('Functional Tests', function() {
       test('One filter', function(done) {
         chai.request(server)
           .get('/api/issues/test')
-          .query({})
+          .query({
+           open: true
+          })
           .end(function(err, res){
             assert.equal(res.status, 200);
             assert.isArray(res.body);
@@ -202,7 +204,11 @@ suite('Functional Tests', function() {
       test('Multiple filters (test for multiple fields you know will be in the db for a return)', function(done) {
         chai.request(server)
           .get('/api/issues/test')
-          .query({})
+          .query({
+            open: true,
+            issue_title: 'Title',
+            issue_text: 'text',
+          })
           .end(function(err, res){
             assert.equal(res.status, 200);
             assert.isArray(res.body);
