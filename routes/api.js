@@ -146,6 +146,10 @@ module.exports = function (app) {
 
     .delete(function (req, res){
       var project = req.params.project;
+      if(!req.body._id){
+        res.json('_id error');
+        return;
+      }
       var id=req.body._id;
       MongoClient.connect(CONNECTION_STRING, function(err, db) {
           if(err) {
